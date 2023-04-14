@@ -36,7 +36,7 @@ function populateShows(shows) {
 
 	for (let show of shows) {
 		const $show = $(
-			`<div data-show-id="${show.id}" class="Show col-md-12 col-lg-6 mb-4">
+			`<div data-show-id="${show.id}" class="Show col-md-6 col-lg-4 mb-4">
          <div class="media">
            <img 
               src="${show.image}" 
@@ -45,9 +45,10 @@ function populateShows(shows) {
            <div class="media-body">
              <h5 class="text-primary">${show.name}</h5>
              <div><small>${show.summary}</small></div>
-             <button class="btn btn-outline-light btn-sm Show-getEpisodes">
+             <button class="btn btn-light btn-sm Show-getEpisodes">
                Episodes
              </button>
+
            </div>
          </div>  
        </div>
@@ -68,6 +69,7 @@ async function searchForShowAndDisplay() {
 
 	$episodesArea.hide();
 	populateShows(shows);
+	episodeLoader();
 }
 
 $searchForm.on('submit', async function (evt) {
@@ -98,11 +100,19 @@ async function getEpisodesOfShow(id) {
 /** Write a clear docstring for this function... */
 
 function populateEpisodes(episodes) {
-	let showEpisodes = $('#episodes-area').$('<ul>List of Episodes</ul>');
+	$('#episodes-list').empty();
 	for (let episode of episodes) {
-		showEpisodes.append(
-			`<li>${episode.name} (season ${episode.season}, number ${episode.number})</li>`
+		$('#episodes-list').append(
+			`<li><b>${episode.name} </b>(season ${episode.season}, number ${episode.number})</li>`
 		);
 	}
-	return showEpisodes;
+	$('#episodes-area').show();
+}
+
+async function episodeLoader() {
+	$('.Show-getEpisodes').on('click', async function (evt) {
+		const selectedId = $(this).parents('.Show').attr('data-show-id');
+		const allEpisodes = await getEpisodesOfShow(selectedId);
+		populateEpisodes(allEpisodes);
+	});
 }
