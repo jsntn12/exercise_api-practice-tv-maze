@@ -17,21 +17,7 @@ async function getShowsByTerm(term) {
 		`https://api.tvmaze.com/search/shows?q=${term}`
 	);
 	const missingImageURL = 'https://tinyurl.com/tv-missing';
-	// let shows = termResults.data;
 	let queryResult = [];
-
-	// for (let item in shows) {
-	// 	result.push({
-	// 		id: shows[item].show.id,
-	// 		name: shows[item].show.name,
-	// 		summary: shows[item].show.summary,
-	// 		image: shows[item].show.image.medium
-	// 			? shows[item].show.image.medium
-	// 			: missingImageURL,
-	// 	});
-	// }
-	// return result;
-
 	for (let data of termResults.data) {
 		queryResult.push({
 			id: data.show.id,
@@ -53,8 +39,8 @@ function populateShows(shows) {
 			`<div data-show-id="${show.id}" class="Show col-md-12 col-lg-6 mb-4">
          <div class="media">
            <img 
-              src="http://static.tvmaze.com/uploads/images/medium_portrait/160/401704.jpg" 
-              alt="Bletchly Circle San Francisco" 
+              src="${show.image}" 
+              alt="${show.name}" 
               class="w-25 mr-3">
            <div class="media-body">
              <h5 class="text-primary">${show.name}</h5>
@@ -77,7 +63,7 @@ function populateShows(shows) {
  */
 
 async function searchForShowAndDisplay() {
-	const term = $('#searchForm-term').val();
+	const term = $('#search-query').val();
 	const shows = await getShowsByTerm(term);
 
 	$episodesArea.hide();
@@ -93,8 +79,30 @@ $searchForm.on('submit', async function (evt) {
  *      { id, name, season, number }
  */
 
-// async function getEpisodesOfShow(id) { }
+async function getEpisodesOfShow(id) {
+	const episodesData = await axios.get(
+		`http://api.tvmaze.com/shows/${id}/episodes`
+	);
+	let showEpisodes = [];
+	for (let episode of episodesData.data) {
+		showEpisodes.push({
+			id: episode.id,
+			season: episode.season,
+			name: episode.name,
+			number: episode.number,
+		});
+	}
+	return showEpisodes;
+}
 
 /** Write a clear docstring for this function... */
 
-// function populateEpisodes(episodes) { }
+function populateEpisodes(episodes) {
+	let showEpisodes = $('#episodes-area').$('<ul>List of Episodes</ul>');
+	for (let episode of episodes) {
+		showEpisodes.append(
+			`<li>${episode.name} (season ${episode.season}, number ${episode.number})</li>`
+		);
+	}
+	return showEpisodes;
+}
